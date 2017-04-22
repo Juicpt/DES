@@ -131,4 +131,25 @@ def LM(s,i):
 #生成密钥
 def key(s):
     ss = encode(s)
-    
+    global C0
+    global D0
+    C0 = ''
+    D0 = ''
+    t = ""
+    KEY = [dict() for i in range(16)]
+    k = 0
+    for i in range(0, 28):
+        C0 += ss[PC_1[i] - 1]
+    for j in range(28, 56):
+        D0 += ss[PC_1[j] - 1]
+    while (k!=16):
+        C0 = LM(C0,LeftMove[k])
+        D0 = LM(D0,LeftMove[k])
+        sss = C0 + D0
+        for i in PC_2:
+            t += sss[i-1]
+        KEY[k] = t
+        k += 1
+        t = ''
+    return KEY
+
