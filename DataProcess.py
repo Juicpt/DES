@@ -128,15 +128,15 @@ def IP_1Replace(s):
 def LM(s,i):
     return s[-(len(s) - i):] + s[:i]
 
+#密钥辅助
+KEY = [dict() for i in range(16)]
+
 #生成密钥
 def key(s):
     ss = encode(s)
-    global C0
-    global D0
     C0 = ''
     D0 = ''
     t = ""
-    KEY = [dict() for i in range(16)]
     k = 0
     for i in range(0, 28):
         C0 += ss[PC_1[i] - 1]
@@ -153,3 +153,66 @@ def key(s):
         t = ''
     return KEY
 
+#拓展置换E
+def EReplace(s):
+    Ebox = ''
+    for i in E:
+        Ebox += s[i-1]
+    return Ebox
+
+#代换盒S
+def SReplace(s):
+    ss = re.findall(r'.{6}', s)
+    sss = ""
+    for i in range(8):
+        a = int(ss[i][0] + ss[i][5],2)
+        b = int(ss[i][1] + ss[i][2] + ss[i][3] + ss[i][4],2)
+
+        sss += bin(S_Box[i][a][b]).replace('0b','').zfill(4)
+    return sss
+
+#置换盒P
+def PReplace(s):
+    ss = ''
+    for i in P:
+        ss += s[i-1]
+    return ss
+
+#F函数
+def F(s,i):
+    return str(bin((int(EReplace(s),2))^int(KEY[i],2)).replace('0b', '').zfill(48))
+
+#加密主函数
+def encodemain(txt,k):
+    c = ''
+    b = ''
+    s = IPReplace(txt)
+    key(k)
+    for ss in re.findall(r'.{64}', s):
+        L0 = ss[0:32]
+        R0 = ss[32:64]
+        for i in range(16):
+            a = L0
+            L0 = R0
+            R0 = str(bin(int(F(R0,i))^int(a,2)).replace('0b', '').zfill(32))
+        b = L0 + R0
+    c +=b
+    return IP_1Replace(b)
+
+#解密主函数
+
+def decodemain(txt,k):
+    c = ''
+    b = ''
+    s = IPReplace(txt)
+    key(k)
+    for ss in re.findall(r'.{64}', s):
+        L0 = ss[0:32]
+        R0 = ss[32:64]
+        for i in range(16,0):
+            a = L0
+            L0 = R0
+            R0 = str(bin(int(F(R0, i)) ^ int(a, 2)).replace('0b', '').zfill(32))
+        b = L0 + R0
+    c += b
+    return IP_1Replace(b)
