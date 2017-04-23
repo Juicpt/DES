@@ -196,8 +196,7 @@ def encodemain(txt,k):
             L0 = R0
             R0 = str(bin(int(F(R0,i),2)^int(a,2)).replace('0b', '').zfill(32))
         b = L0 + R0
-    c +=b
-    print(c)
+        c +=b
     return IP_1Replace(c)
 
 #解密主函数
@@ -208,8 +207,6 @@ def decodemain(txt,k):
     s = IPReplace(txt)
     key(k)
     for ss in re.findall(r'.{64}', s):
-        R0 = ''
-        L0 = ''
         L0 = ss[0:32]
         R0 = ss[32:64]
         for i in range(15, -1, -1):
@@ -217,5 +214,5 @@ def decodemain(txt,k):
             R0 = L0
             L0 = str(bin(int(F(L0, i),2) ^ int(a, 2)).replace('0b', '').zfill(32))
         b = L0 + R0
-    c += b
+        c += b
     return IP_1Replace(c)
