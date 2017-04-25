@@ -216,3 +216,11 @@ def decodemain(txt,k):
         b = L0 + R0
         c += b
     return IP_1Replace(c)
+
+#三重加密
+def tripleencodemain(txt,k1,k2):
+    return encodemain(encodemain(encodemain(txt,k1),k2),k1)
+
+#三重解密
+def tripledecodemain(txt,k1,k2):
+    return decodemain(decodemain(decodemain(txt,k1),k2),k1)

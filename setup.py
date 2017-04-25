@@ -1,22 +1,17 @@
-# coding=utf8
+import sys
+from cx_Freeze import setup, Executable
 
-from distutils.core import setup
+# Dependencies are automatically detected, but it might need fine tuning.
+build_exe_options = {"packages": ["os"], "excludes": ["tkinter"]}
 
-extra_modules = ["bs4"]
+# GUI applications require a different base on Windows (the default is for a
+# console application).
+base = None
+if sys.platform == "win32":
+    base = "Win32GUI"
 
-options = {"py2exe":
-                {"compressed": 1,
-                 "optimize": 2,
-                 "bundle_files": 1, # 表示把所有文件打包进exe可执行程序
-                 "packages": extra_modules,
-                 #"includes": extra_modules
-                }
-          }
-setup(
-    version = "1.0.0",
-    description = "test for py2exe",
-    name = "Py2exeTest",
-    options = options,
-    zipfile = None,
-    console = [{"script": "GUI.py"}]
-)
+setup(  name = "guifoo",
+        version = "0.1",
+        description = "My GUI application!",
+        options = {"build_exe": build_exe_options},
+        executables = [Executable("QTui.py", base=base)])
