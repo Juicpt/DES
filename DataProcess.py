@@ -1,5 +1,5 @@
 import re
-
+import base64
 #初始置换数组
 IP = [58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4, 62, 54,
       46, 38, 30, 22, 14, 6, 64, 56, 48, 40, 32, 24, 16, 8, 57, 49, 41, 33,
@@ -104,11 +104,41 @@ def encode(s):
 def decode(s):
     return ''.join([chr(i) for i in [int(b, 2) for b in re.findall(r'.{8}', s)]])
 
+base='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+def base64encode(s):  # 该部分主要是对二进制串进行base64处理
+    out = ''
+    ss = ''.join(s)
+    a = len(ss) % 24
+    if a == 8:  # 补0操作
+        ss += '0000'
+    if a == 16:
+        ss += '00'
+    m = int(len(ss) / 6)
+    for j in range(m):
+        out += base[int(ss[j * 6:j * 6 + 6], 2)]
+    if (a == 8):  # 补=操作
+        out += '=='
+    if (a == 16):
+        out += '='
+    return out
+
+
+def base64decode(s):  # 该部分主要进行base64解码操作
+    temp1 = s.split('=')[0]  # 去掉多余的=
+    temp2 = ''
+    for i in temp1:  # 将字符串转化为二进制串
+        temp2 += str(bin(base.index(i))).replace('0b', '').zfill(6)
+    temp3 = len(temp2)
+    if (temp3 - 2) % 64 == 0:  # 去掉多余的0
+        temp2 = temp2[0:len(temp2) - 2]
+    if (temp3 - 4) % 64 == 0:
+        temp2 = temp2[0:len(temp2) - 4]
+    return temp2
+
 #初始置换
 def IPReplace(s):
     tmpM = ''
-    ss = encode(s)
-    for sss in re.findall(r'.{64}', ss):
+    for sss in re.findall(r'.{64}', s):
         ssss = list(sss)
         for i in IP:
             tmpM += ssss[i-1]
@@ -121,8 +151,8 @@ def IP_1Replace(s):
         sss = list(ss)
         for i in IP_1:
             tmpC += sss[i-1]
-    ssss = decode(tmpC)
-    return ssss
+
+    return tmpC
 
 #循环左移
 def LM(s,i):
@@ -182,11 +212,12 @@ def PReplace(s):
 def F(s,i):
     return PReplace(SReplace(str(bin((int(EReplace(s),2))^int(KEY[i],2)).replace('0b', '').zfill(48))))
 
+
 #加密主函数
 def encodemain(txt,k):
     c = ''
     b = ''
-    s = IPReplace(txt)
+    s = IPReplace(encode(txt))
     key(k)
     for ss in re.findall(r'.{64}', s):
         L0 = ss[0:32]
@@ -197,14 +228,14 @@ def encodemain(txt,k):
             R0 = str(bin(int(F(R0,i),2)^int(a,2)).replace('0b', '').zfill(32))
         b = L0 + R0
         c +=b
-    return IP_1Replace(c)
+    return base64encode(IP_1Replace(c))
 
 #解密主函数
 
 def decodemain(txt,k):
     c = ''
     b = ''
-    s = IPReplace(txt)
+    s = IPReplace(base64decode(txt))
     key(k)
     for ss in re.findall(r'.{64}', s):
         L0 = ss[0:32]
@@ -215,12 +246,12 @@ def decodemain(txt,k):
             L0 = str(bin(int(F(L0, i),2) ^ int(a, 2)).replace('0b', '').zfill(32))
         b = L0 + R0
         c += b
-    return IP_1Replace(c)
+    return decode(IP_1Replace(c))
 
 #三重加密
 def tripleencodemain(txt,k1,k2):
     return encodemain(encodemain(encodemain(txt,k1),k2),k1)
 
 #三重解密
-    def tripledecodemain(txt,k1,k2):
+def tripledecodemain(txt,k1,k2):
     return decodemain(decodemain(decodemain(txt,k1),k2),k1)
